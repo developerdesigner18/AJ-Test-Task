@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: verification-service
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: verification-service
+    template:
+        metadata:
+            labels:
+                app: verification-service
+        spec:
+            containers:
+                - name: verification-service
+                  image: verification-service # Changed from localhost:5000/verification-service
+                  ports:
+                      - containerPort: 3002
+                  env:
+                      - name: PORT
+                        value: "3002"
+                      - name: MONGODB_URI
+                        value: "mongodb://mongodb:27017/kube-credential"
+                      - name: HOSTNAME
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.name
+                  resources:
+                      requests:
+                          memory: "128Mi"
+                          cpu: "100m"
+                      limits:
+                          memory: "256Mi"
+                          cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: verification-service
+spec:
+    selector:
+        app: verification-service
+    ports:
+        - port: 80
+          targetPort: 3002
+    type: ClusterIP

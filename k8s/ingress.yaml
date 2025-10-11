@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: api-ingress
+    namespace: default
+    annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+    ingressClassName: nginx
+    rules:
+        - http:
+              paths:
+                  - path: /api/issuance(/|$)(.*)
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: issuance-service
+                            port:
+                                number: 80
+                  - path: /api/verification(/|$)(.*)
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: verification-service
+                            port:
+                                number: 80
+---
+# Frontend Ingress without rewrite
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: frontend-ingress
+    namespace: default
+spec:
+    ingressClassName: nginx
+    rules:
+        - http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: frontend
+                            port:
+                                number: 80
